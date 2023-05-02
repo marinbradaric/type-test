@@ -5,6 +5,7 @@ const setButtons = document.querySelectorAll(".wordCountBtn");
 const randomText = document.getElementById("random-text");
 const userInput = document.getElementById("user-input");
 const modalClose = document.getElementById("modal-close");
+const toggleSwitch = document.getElementById("flexSwitchCheckDefault");
 // function fetches words from text file
 fetch("words.txt")
   .then((response) => response.text())
@@ -27,6 +28,95 @@ setButtons.forEach((button) => {
     document.getElementById("timer").innerText = "Time: ";
   });
 });
+
+// toggles dark mode
+const switchTheme = () => {
+  const body = document.body;
+  const isDark = body.classList.contains("dark");
+  const themeToggle = document.getElementById("flexSwitchCheckDefault");
+
+  if (isDark) {
+    body.classList.remove("dark");
+    body.classList.add("light");
+
+    const darkElems = document.querySelectorAll(".bg-dark");
+    darkElems.forEach((darkElem) => {
+      if (!darkElem.classList.contains("exclude-theme-toggle")) {
+        darkElem.classList.remove("bg-dark");
+        darkElem.classList.add("bg-light");
+      }
+    });
+    // change text from white to black
+    const whiteText = document.querySelectorAll(".text-light");
+    whiteText.forEach((whiteText) => {
+      if (!whiteText.classList.contains("exclude-theme-toggle")) {
+        whiteText.classList.remove("text-light");
+        whiteText.classList.add("text-dark");
+      }
+    });
+
+    // change buttons from dark to light
+    const darkBtn = document.querySelectorAll(".btn-dark, .btn-close-white");
+    darkBtn.forEach((darkBtn) => {
+      darkBtn.classList.remove("btn-dark");
+      darkBtn.classList.add("btn-light");
+      darkBtn.classList.remove("btn-close-white");
+      darkBtn.classList.add("btn-close-black");
+    });
+
+    // change buttons outline from light to dark
+    const darkBtnOutline = document.querySelectorAll(".btn-outline-light");
+    darkBtnOutline.forEach((darkBtnOutline) => {
+      if (!darkBtnOutline.classList.contains("exclude-theme-toggle")) {
+        darkBtnOutline.classList.remove("btn-outline-light");
+        darkBtnOutline.classList.add("btn-outline-dark");
+      }
+    });
+  } else {
+    body.classList.remove("light");
+    body.classList.add("dark");
+
+    const lightElems = document.querySelectorAll(".bg-light");
+    lightElems.forEach((lightElem) => {
+      if (!lightElem.classList.contains("exclude-theme-toggle")) {
+        lightElem.classList.remove("bg-light");
+        lightElem.classList.add("bg-dark");
+      }
+    });
+
+    // change text from black to white
+    const blackText = document.querySelectorAll(".text-dark");
+    blackText.forEach((blackText) => {
+      if (!blackText.classList.contains("exclude-theme-toggle")) {
+        blackText.classList.remove("text-dark");
+        blackText.classList.add("text-light");
+      }
+    });
+
+    // change buttons from light to dark
+    const lightBtn = document.querySelectorAll(".btn-light, .btn-close-black");
+    lightBtn.forEach((lightBtn) => {
+      lightBtn.classList.remove("btn-light");
+      lightBtn.classList.add("btn-dark");
+      lightBtn.classList.remove("btn-close-black");
+      lightBtn.classList.add("btn-close-white");
+    });
+
+    // change buttons outline from dark to light
+    const lightBtnOutline = document.querySelectorAll(".btn-outline-dark");
+    lightBtnOutline.forEach((lightBtnOutline) => {
+      if (!lightBtnOutline.classList.contains("exclude-theme-toggle")) {
+        lightBtnOutline.classList.remove("btn-outline-dark");
+        lightBtnOutline.classList.add("btn-outline-light");
+      }
+    });
+  }
+
+  themeToggle.checked = isDark;
+};
+
+toggleSwitch.addEventListener("change", switchTheme);
+switchTheme();
 
 // generates random words
 function generateWords() {

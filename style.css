@@ -19,3 +19,23 @@
   background-color: white;
   border: 1px solid black;
 }
+
+.switch-container {
+  font-size: 1.5rem;
+}
+
+.switch-icon {
+  padding-left: 1rem;
+}
+
+/* Dark theme */
+body.dark {
+  background-color: #1a1a1a;
+  color: #fff;
+}
+
+/* Light theme */
+body.light {
+  background-color: #f5f5f5;
+  color: #333;
+}
