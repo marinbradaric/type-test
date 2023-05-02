@@ -72,6 +72,13 @@ const switchTheme = () => {
         darkBtnOutline.classList.add("btn-outline-dark");
       }
     });
+
+    // change border from white to black
+    const whiteBorder = document.querySelectorAll(".border-white");
+    whiteBorder.forEach((whiteBorder) => {
+      whiteBorder.classList.remove("border-white");
+      whiteBorder.classList.add("border-black");
+    });
   } else {
     body.classList.remove("light");
     body.classList.add("dark");
@@ -109,6 +116,13 @@ const switchTheme = () => {
         lightBtnOutline.classList.remove("btn-outline-dark");
         lightBtnOutline.classList.add("btn-outline-light");
       }
+    });
+
+    // change border from black to white
+    const blackBorder = document.querySelectorAll(".border-black");
+    blackBorder.forEach((blackBorder) => {
+      blackBorder.classList.remove("border-black");
+      blackBorder.classList.add("border-white");
     });
   }
 
