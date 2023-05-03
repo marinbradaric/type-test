@@ -4,7 +4,6 @@ let wordCount = 10;
 const setButtons = document.querySelectorAll(".wordCountBtn");
 const randomText = document.getElementById("random-text");
 const userInput = document.getElementById("user-input");
-const modalClose = document.getElementById("modal-close");
 const toggleSwitch = document.getElementById("flexSwitchCheckDefault");
 // function fetches words from text file
 fetch("words.txt")
@@ -79,6 +78,12 @@ const switchTheme = () => {
       whiteBorder.classList.remove("border-white");
       whiteBorder.classList.add("border-black");
     });
+
+    // change icon from sun to moon
+    const sun = document.getElementById("sun");
+    const moon = document.getElementById("moon");
+    sun.classList.remove("d-none");
+    moon.classList.add("d-none");
   } else {
     body.classList.remove("light");
     body.classList.add("dark");
@@ -124,6 +129,12 @@ const switchTheme = () => {
       blackBorder.classList.remove("border-black");
       blackBorder.classList.add("border-white");
     });
+
+    // change icon from moon to sun
+    const sun = document.getElementById("sun");
+    const moon = document.getElementById("moon");
+    sun.classList.add("d-none");
+    moon.classList.remove("d-none");
   }
 
   themeToggle.checked = isDark;
@@ -212,22 +223,27 @@ const editDistance = (s1, s2) => {
 function calculateAccuracy() {
   const [userText, randomTextVal] = [userInput.value, randomText.innerText];
 
-  let accuracy = Math.round(calcAccuracy(userText, randomTextVal) * 100);
-  if (accuracy >= 75) {
-    document.getElementById("accuracy").style.color = "#42ba96";
-  } else if (accuracy <= 25) {
-    document.getElementById("accuracy").style.color = "#df4759";
-  } else if (accuracy > 25 && accuracy < 75) {
-    document.getElementById("accuracy").style.color = "orange";
+  const accuracy = Math.round(calcAccuracy(userText, randomTextVal) * 100);
+  const accuracyText = `Accuracy: ${accuracy}%`;
+
+  let color = "";
+  switch (true) {
+    case accuracy >= 75:
+      color = "#42ba96";
+      break;
+    case accuracy <= 25:
+      color = "#df4759";
+      break;
+    default:
+      color = "orange";
   }
-  document.getElementById("accuracy").innerText = "Accuracy: " + accuracy + "%";
+
+  const accuracyElem = document.getElementById("accuracy");
+  accuracyElem.style.color = color;
+  accuracyElem.innerText = accuracyText;
 }
 
-// change color of each letter as user types
-userInput.addEventListener("input", () => {
-  changeColor(userInput);
-});
-
+// changes color of text based on user input
 const changeColor = (input) => {
   const arrayText = randomText.textContent.split("");
   const arrayValue = input.value.split("");
@@ -264,7 +280,7 @@ const finishWindow = (totalTime) => {
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
-      closeModal();
+      userInput.focus();
     }
   });
 };
@@ -272,18 +288,10 @@ const finishWindow = (totalTime) => {
 let startTime, start, endTime, end, timerInterval;
 
 // checks if user has typed all the words
-const isLastChar = () => {
-  if (userInput.value.length === randomText.innerText.length) {
-    return true;
-  }
-  return false;
-};
-
-const closeModal = () => {
-  userInput.focus();
-};
+const isLastChar = () => userInput.value.length === randomText.innerText.length;
 
 userInput.addEventListener("input", () => {
+  changeColor(userInput);
   if (isLastChar()) {
     userInput.disabled = true;
     clearInterval(timerInterval);
