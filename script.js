@@ -357,16 +357,16 @@ let typedChars = 0;
 let typedWords = "";
 let randomTextStored = "";
 
-userInput.addEventListener("input", (e) => {
+userInput.addEventListener("input", () => {
   if (timeTab.getAttribute("aria-selected") === "true") {
-    if (e.data === " ") {
-      // remove typed word and store it in a variable
+    if (userInput.value.includes(" ")) {
+      // removes typed word and stores it in a variable
       typedWords += `${userInput.value}`;
       randomTextStored += `${randomText.innerText.split(" ")[0]} `;
       const firstWord = randomText.innerText.split(" ")[0];
       randomText.innerText = randomText.innerText.replace(`${firstWord} `, "");
       userInput.value = "";
-      // add a new word to the end of the text
+      // adds a new word to the end of the text
       const randomIndex = Math.floor(Math.random() * wordsArr.length);
       const newWord = wordsArr[randomIndex];
       randomText.innerText = `${randomText.innerText} ${newWord}`;
