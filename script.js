@@ -1,10 +1,13 @@
 let wordsArr = [];
 let wordCount = 10;
 
-const setButtons = document.querySelectorAll(".wordCountBtn");
+const setWordsButtons = document.querySelectorAll(".wordCountBtn");
+const setTimeButtons = document.querySelectorAll(".timeBtn");
 const randomText = document.getElementById("random-text");
 const userInput = document.getElementById("user-input");
 const toggleSwitch = document.getElementById("flexSwitchCheckDefault");
+const timeTab = document.getElementById("time-tab");
+const wordsTab = document.getElementById("words-tab");
 // function fetches words from text file
 fetch("words.txt")
   .then((response) => response.text())
@@ -14,7 +17,7 @@ fetch("words.txt")
     displayWords();
   });
 
-setButtons.forEach((button) => {
+setWordsButtons.forEach((button) => {
   button.addEventListener("click", () => {
     wordCount = parseInt(button.innerText);
     displayWords();
@@ -26,6 +29,42 @@ setButtons.forEach((button) => {
     clearInterval(timerInterval);
     document.getElementById("timer").innerText = "Time: ";
   });
+});
+
+let timer2 = null;
+let countdownTimer = 15;
+setTimeButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    countdownTimer = parseInt(button.innerText);
+    displayInfiniteWords();
+    document.getElementById("countdown").innerText = `${countdownTimer} s`;
+    userInput.value = "";
+    userInput.focus();
+    document.getElementById("accuracy").innerText = "Accuracy: ";
+    document.getElementById("accuracy").style.color = "white";
+    document.getElementById("words-per-minute").innerText = "WPM: ";
+    clearInterval(timerInterval);
+  });
+});
+
+timeTab.addEventListener("click", () => {
+  displayInfiniteWords();
+  // sets default time to 15 seconds
+  document.getElementById("btnradio4").checked = true;
+  countdownTimer = 15;
+  document.getElementById("countdown").innerText = `${countdownTimer} s`;
+});
+
+const displayInfiniteWords = () => {
+  wordCount = 10;
+  displayWords();
+};
+
+wordsTab.addEventListener("click", () => {
+  displayWords();
+  document.getElementById("btnradio1").checked = true;
+  wordCount = 10;
+  document.getElementById("countdown").innerText = "";
 });
 
 // toggles dark mode
@@ -164,10 +203,19 @@ displayWords();
 // calculates Words Per Minute
 const calculateWPM = (time) => {
   const userText = userInput.value;
-  const totalCharacters = userText.length;
+  let totalCharacters;
+  let theAccuracy;
+  // if wordstab is selected, calculate accuracy based on words
+  if (wordsTab.getAttribute("aria-selected") === "true") {
+    theAccuracy = calcAccuracy(userText, randomText.innerText);
+    totalCharacters = userText.length;
+  } else if (timeTab.getAttribute("aria-selected") === "true") {
+    theAccuracy = calcAccuracy(typedWords, randomTextStored);
+    totalCharacters = typedChars;
+  }
   const grossWPM = totalCharacters / 5 / (time / 60);
-  const netWPM = grossWPM * calcAccuracy(userText, randomText.innerText);
-  wordsPerMinute = Math.round(netWPM);
+  const netWPM = grossWPM * theAccuracy;
+  const wordsPerMinute = Math.round(netWPM);
   document.getElementById(
     "words-per-minute"
   ).innerText = `WPM: ${wordsPerMinute}`;
@@ -223,7 +271,14 @@ const editDistance = (s1, s2) => {
 function calculateAccuracy() {
   const [userText, randomTextVal] = [userInput.value, randomText.innerText];
 
-  const accuracy = Math.round(calcAccuracy(userText, randomTextVal) * 100);
+  let accuracy;
+  // if wordstab is selected, calculate accuracy based on words
+  if (wordsTab.getAttribute("aria-selected") === "true") {
+    accuracy = Math.round(calcAccuracy(userText, randomTextVal) * 100);
+  } else if (timeTab.getAttribute("aria-selected") === "true") {
+    accuracy = Math.round(calcAccuracy(typedWords, randomTextStored) * 100);
+  }
+
   const accuracyText = `Accuracy: ${accuracy}%`;
 
   let color = "";
@@ -264,10 +319,15 @@ const changeColor = (input) => {
 // resets text and timer
 const resetText = () => {
   clearInterval(timerInterval);
+  clearInterval(countdownInterval);
+  if (timeTab.getAttribute("aria-selected") === "true") {
+    document.getElementById("countdown").innerText = `${countdownTimer} s`;
+  }
   displayWords();
   userInput.value = "";
   userInput.focus();
   startTime = null;
+  countdownInterval = null;
 };
 
 // displays "results" modal after user finishes typing
@@ -283,6 +343,8 @@ const finishWindow = (totalTime) => {
       userInput.focus();
     }
   });
+  typedWords = "";
+  randomTextStored = "";
 };
 
 let startTime, start, endTime, end, timerInterval;
@@ -290,40 +352,97 @@ let startTime, start, endTime, end, timerInterval;
 // checks if user has typed all the words
 const isLastChar = () => userInput.value.length === randomText.innerText.length;
 
-userInput.addEventListener("input", () => {
+let typedChars = 0;
+
+let typedWords = "";
+let randomTextStored = "";
+
+userInput.addEventListener("input", (e) => {
+  if (timeTab.getAttribute("aria-selected") === "true") {
+    if (e.data === " ") {
+      // remove typed word and store it in a variable
+      typedWords += `${userInput.value}`;
+      randomTextStored += `${randomText.innerText.split(" ")[0]} `;
+      const firstWord = randomText.innerText.split(" ")[0];
+      randomText.innerText = randomText.innerText.replace(`${firstWord} `, "");
+      userInput.value = "";
+      // add a new word to the end of the text
+      const randomIndex = Math.floor(Math.random() * wordsArr.length);
+      const newWord = wordsArr[randomIndex];
+      randomText.innerText = `${randomText.innerText} ${newWord}`;
+    }
+  }
+
   changeColor(userInput);
-  if (isLastChar()) {
-    userInput.disabled = true;
-    clearInterval(timerInterval);
-    endTime = new Date();
-    end = endTime.getTime();
-    let totalTime = (end - start) / 1000;
-    finishWindow(totalTime);
-    displayWords();
-    userInput.value = "";
-    userInput.disabled = false;
-    startTime = null;
+  if (wordsTab.getAttribute("aria-selected") === "true") {
+    if (isLastChar()) {
+      userInput.disabled = true;
+      clearInterval(timerInterval);
+      endTime = new Date();
+      end = endTime.getTime();
+      let totalTime = (end - start) / 1000;
+      finishWindow(totalTime);
+      displayWords();
+      userInput.value = "";
+      userInput.disabled = false;
+      startTime = null;
+    }
+  } else if (timeTab.getAttribute("aria-selected") === "true") {
+    // count typed characters
+    typedChars = typedWords.length;
   }
 });
 
-userInput.addEventListener("keydown", (e) => {
-  if (!startTime) {
-    clearInterval(timerInterval);
-    startTime = new Date();
-    start = startTime.getTime();
-    // start the timer interval
-    timerInterval = setInterval(() => {
-      let currentTime = new Date().getTime();
-      let elapsedTime = (currentTime - start) / 1000;
-      document.getElementById("timer").innerText = `Time: ${elapsedTime.toFixed(
-        2
-      )} seconds`;
-    }, 10);
-    userInput.value = "";
-  }
+let countdownInterval = null;
 
-  // disable 2 spaces
-  if (e.key === " " && userInput.value.slice(-1) === " ") {
-    e.preventDefault();
+const startCountdown = () => {
+  let countdownValue = countdownTimer;
+  const countdownElement = document.getElementById("countdown");
+  countdownInterval = setInterval(() => {
+    countdownValue -= 0.01;
+    countdownElement.innerText = `${countdownValue.toFixed(2)} s`;
+
+    if (countdownValue <= 0) {
+      userInput.disabled = true;
+      finishWindow(countdownTimer);
+      displayInfiniteWords();
+      clearInterval(countdownInterval);
+      countdownValue = countdownTimer;
+      countdownElement.innerText = `${countdownValue} s`;
+      userInput.disabled = false;
+      countdownInterval = null;
+    }
+  }, 10);
+};
+
+userInput.addEventListener("keydown", (e) => {
+  // check whether the time or words tab is selected
+  if (wordsTab.getAttribute("aria-selected") === "true") {
+    if (!startTime) {
+      clearInterval(timerInterval);
+      startTime = new Date();
+      start = startTime.getTime();
+      // start the timer interval
+      timerInterval = setInterval(() => {
+        let currentTime = new Date().getTime();
+        let elapsedTime = (currentTime - start) / 1000;
+        document.getElementById(
+          "timer"
+        ).innerText = `Time: ${elapsedTime.toFixed(2)} seconds`;
+      }, 10);
+      userInput.value = "";
+    }
+
+    // disable 2 spaces
+    if (e.key === " " && userInput.value.slice(-1) === " ") {
+      e.preventDefault();
+    }
+  } else if (timeTab.getAttribute("aria-selected") === "true") {
+    if (!countdownInterval) {
+      startCountdown();
+    }
+    document.getElementById(
+      "timer"
+    ).innerText = `Time: ${countdownTimer} seconds`;
   }
 });

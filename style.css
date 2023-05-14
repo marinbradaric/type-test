@@ -27,3 +27,8 @@
 .switch-icon {
   padding-left: 1rem;
 }
+
+#random-text {
+  font-size: auto;
+  line-height: 1.5;
+}
