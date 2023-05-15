@@ -8,6 +8,7 @@ const userInput = document.getElementById("user-input");
 const toggleSwitch = document.getElementById("flexSwitchCheckDefault");
 const timeTab = document.getElementById("time-tab");
 const wordsTab = document.getElementById("words-tab");
+const resetButton = document.getElementById("reset-text");
 // function fetches words from text file
 fetch("words.txt")
   .then((response) => response.text())
@@ -416,6 +417,10 @@ const startCountdown = () => {
 };
 
 userInput.addEventListener("keydown", (e) => {
+  if (e.key === "Tab") {
+    e.preventDefault();
+    resetButton.focus();
+  }
   // check whether the time or words tab is selected
   if (wordsTab.getAttribute("aria-selected") === "true") {
     if (!startTime) {
